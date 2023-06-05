@@ -77,7 +77,7 @@ class PrivateRecipeAPITests(TestCase):
     def test_recipes_limited_to_user(self):
         """Test list of recipes is limited to authenticated user."""
         other_user = get_user_model().objects.create_user(
-            'user@example.com',
+            'user2@example.com',
             'password123',
         )
         create_recipe(user=other_user)
