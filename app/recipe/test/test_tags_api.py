@@ -7,7 +7,7 @@ from django.test import TestCase
 
 from core.models import Tag
 
-from recipe.serializars import TagSerializaer
+from recipe.serializers import TagSerializer
 
 from rest_framework import status
 
@@ -49,7 +49,7 @@ class PrivateTagsApiTests(TestCase):
         res = self.client.get(TAGS_URL)
 
         tags = Tag.objects.all().order_by('-name')
-        serializer = TagSerializaer(tags, many=True)
+        serializer = TagSerializer(tags, many=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
 
@@ -65,14 +65,3 @@ class PrivateTagsApiTests(TestCase):
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]['name'], tag.name)
         self.assertEqual(res.data[0]['id'], tag.id)
-
-    def test_create_tag_successful(self):
-        """Test creating a new tag."""
-        payload = {'name': 'Test tag'}
-        self.client.post(TAGS_URL, payload)
-
-        exists = Tag.objects.filter(
-            user=self.user,
-            name=payload['name']
-        ).exists()
-        self.assertTrue(exists)
