@@ -7,11 +7,11 @@ from django.urls import reverse
 from django.test import TestCase
 
 from rest_framework import status 
-from rest_framework.test  import APIClient
+from rest_framework.test import APIClient
 
 from core.models import Ingredient
 
-from recipe.serializers  import IngredientSerializer 
+from recipe.serializers import IngredientSerializer
 
 INGREDIENTS_URL = reverse('recipe:ingredient-list')
 
@@ -47,8 +47,8 @@ class PrivateIngredientsApiTest(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(self.user)
     
-    def test_retrive_ingredients(self):
-        """Test retriving a list of ingredients."""
+    def test_retrieve_ingredients(self):
+        """Test retrieving a list of ingredients."""
         Ingredient.objects.create(user=self.user, name='Kale')
         Ingredient.objects.create(user=self.user, name='Vanilla')
 
@@ -59,7 +59,7 @@ class PrivateIngredientsApiTest(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
 
-    def test_ingredients_limites_to_user(self):
+    def test_ingredients_limits_to_user(self):
         """Test list of ingredients is limited to authenticated user."""
         user2 = create_user(email='user2@ecample.com')
         Ingredient.objects.create(user=user2, name='Salt')
