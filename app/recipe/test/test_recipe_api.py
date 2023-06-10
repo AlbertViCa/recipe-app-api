@@ -260,12 +260,12 @@ class PrivateRecipeAPITests(TestCase):
 
         tag_lunch = Tag.objects.create(user=self.user, name='Lunch')
         payload = {'tags': [{'name': 'Lunch'}]}
-        url = detali_url(recipe.id)
-        res = self.client_patch(url, payload, format='json')
+        url = detail_url(recipe.id)
+        res = self.client.patch(url, payload, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIn(tag_luch, recipe.tags.all())
-        self.assertNotIn(tag_breakfast, recipe.tag.all())
+        self.assertIn(tag_lunch, recipe.tags.all())
+        self.assertNotIn(tag_breakfast, recipe.tags.all())
 
     def test_clear_recipe_tags(self):
         """Test clearing a recipe tags."""
@@ -324,4 +324,44 @@ class PrivateRecipeAPITests(TestCase):
                     user=self.user,
             ).exists()
             self.assertTrue(exists)
+
+    def test_create_ingredient_on_update(self):
+        """Tests creating ingredient when updating a recipe"""
+        recipe = create_recipe(user=self.user)
+
+        payload = {'ingredients': [{'name': 'Salt'}]}
+        url = detail_url(recipe.id)
+        res = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        new_ingredient = Ingredient.objects.get(user=self.user, name='Salt')
+        self.assertIn(new_ingredient, recipe.ingredients.all())
+
+    def test_update_recipe_assign_ingredient(self):
+        """Tests assigning an existing recipe when updating a recipe."""
+        ingredient_onion = Ingredient.objects.create(user=self.user, name='Onion')
+        recipe = create_recipe(user=self.user)
+        recipe.ingredients.add(ingredient_onion)
+        
+        ingredient_tomato = Ingredient.objects.create(user=self.user, name='Tomato')
+        payload = {'ingredients': [{'name': 'Tomato'}]}
+        url = detail_url(recipe.id)
+        res = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn(ingredient_tomato, recipe.ingredients.all())
+        self.assertNotIn(ingredient_onion, recipe.ingredients.all())
+
+    def test_clear_recipe_ingredients(self):
+        """Tests clearing ingredients from a recipe"""
+        ingredient = Ingredient.objects.create(user=self.user, name='Sugar')
+        recipe = create_recipe(user=self.user)
+        recipe.ingredients.add(ingredient)
+
+        payload = {'ingredients': []}
+        url = detail_url(recipe.id)
+        res = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(recipe.ingredients.count(), 0)
 
